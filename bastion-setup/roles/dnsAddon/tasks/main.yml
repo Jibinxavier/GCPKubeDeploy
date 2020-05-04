@@ -1,0 +1,34 @@
+---
+# tasks file for dnsAddon
+
+
+- name: The DNS Cluster Add-on
+  shell: "kubectl apply -f https://storage.googleapis.com/kubernetes-the-hard-way/coredns.yaml"
+
+
+- name: List the pods created by the kube-dns deployment
+  shell: "kubectl get pods -l k8s-app=kube-dns -n kube-system"
+  register: POD_INFO
+
+
+- debug: msg={{POD_INFO.stdout_lines}}
+#Verification
+- name: check if busybox was created
+  shell: "kubectl get pods -l run=busybox"
+  register: BUSYBOX_OUT
+
+
+- name: Create a busybox  if doesnt exist
+  shell: "kubectl run --generator=run-pod/v1 busybox --image=busybox:1.28 --command -- sleep"
+  when: "'busybox' not in BUSYBOX_OUT.stdout"
+
+
+- name: Retrieve the full name of the busybox pod
+  shell: 'kubectl get pods -l run=busybox -o jsonpath="{.items[0].metadata.name}"'
+  register: POD_NAME
+
+- name: Execute a DNS lookup for the kubernetes service inside the busybox pod
+  shell: "kubectl exec -ti {{POD_NAME.stdout}} -- nslookup kubernetes"
+  register: NSLOOKUP_OUT
+
+- debug: msg={{NSLOOKUP_OUT.stdout_lines}}

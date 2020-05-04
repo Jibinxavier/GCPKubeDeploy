@@ -1,0 +1,11 @@
+---
+# tasks file for sshkeygen
+- name: Transfer the worker and controller ssh keys to automation server
+  copy:
+    src: "{{ local_ssh_dir }}"
+    dest: /automation/
+    owner: root
+    group: root
+    mode: '0644'
+  
+ 

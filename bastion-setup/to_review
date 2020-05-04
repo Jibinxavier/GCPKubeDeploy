@@ -1,0 +1,48 @@
+
+* The host file has ssh config that disables ssh fingerprinting the public key. THe assumption is that these are internally assigned ips and the host files is already 
+considered the source of truth. Futhermore, the private key paths are also configured, should there be any mismatch ssh wouldn't work.
+
+ Alternative is to add a task in tlscertGenAndTransfer.yml that manually adds the ssh finger print https://www.techrepublic.com/article/how-to-easily-add-an-ssh-fingerprint-to-your-knownhosts-file-in-linux/
+
+ * Local users have been created but, could not disable ssh for them through ansible -  need to upgrade e.g bastion-setup/roles/bootstrapEtcd/tasks/main.yml
+
+
+
+
+
+------------ For documentation ---------------
+
+How things are structured?
+ * Terraform deploys the required infrastructure on GCP and stores the state in a file.
+ * `python populate_hosts.py` ingests this state file to produce a hosts file suitable for Ansible 
+ * `bootstrap-automation-serv.yml` Transfers the relevant files to the automation 
+ 
+
+
+Where are the environment variables setup
+ in `defaults` and  vars/main.yml
+
+
+Even if this aren't DRY enough.
+
+Thigs might not be DRY, but this was done to reduce complexity
+ 
+
+-------------- Cloud load balancers -----------------------
+
+Different LB options are listed herehttps://cloud.google.com/load-balancing/docs/choosing-load-balancer
+
+Will be using a regional - its cheaper
+
+changed bastion-setup/roles/bootstrapKubeWorkers/files/containerd.service  exec to /usr/local/bin/containerd
+
+
+
+
+-------------- ETCD -----------------------
+
+Might need to upgrade ETCD as there some issue with TLS client https://github.com/etcd-io/etcd/pull/11184
+
+which seems to cause 
+kube-controller-1 etcd[22011]: rejected connection from "10.240.0.12:60746" (error "EOF", ServerName "")
+

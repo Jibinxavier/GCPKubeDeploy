@@ -1,0 +1,44 @@
+#Enable HTTP Health Checks
+- name: Install nginx
+    
+  become: true
+  apt:
+    name: nginx
+  
+
+- name: Configure nginx 
+  copy:
+    src: "{{ role_path }}/files/kubernetes.default.svc.cluster.local"
+    dest: /etc/nginx/sites-available/kubernetes.default.svc.cluster.local
+    owner: kube
+    group: kube
+    mode: '0644' # might be too restrictive
+
+
+- name: Create a symlink to ngix
+  file: 
+    src: /etc/nginx/sites-available/kubernetes.default.svc.cluster.local
+    path: /etc/nginx/sites-enabled/kubernetes.default.svc.cluster.local
+    force: yes
+    state: link
+
+- name: Start nginx
+  service: 
+    name: nginx
+    state: started 
+    enabled: yes
+
+
+- name: Restart nginx
+  service: 
+    name: nginx
+    state: restarted
+    enabled: yes
+
+- name:  test nginx HTTP health check proxy
+  shell: |
+    curl -H "Host: kubernetes.default.svc.cluster.local" -i http://127.0.0.1/healthz
+
+- name: Verification 
+  shell: |
+    kubectl get componentstatuses --kubeconfig /admin.kubeconfig

@@ -1,0 +1,4 @@
+---
+
+- import_tasks: kubeControl.yml
+- import_tasks: installHealthCheck.yml

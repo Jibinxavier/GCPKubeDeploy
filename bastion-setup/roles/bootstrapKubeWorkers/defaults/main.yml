@@ -1,0 +1,10 @@
+---
+# defaults file for bootstrapKubeWorkers
+
+cri_tools_url: https://github.com/kubernetes-sigs/cri-tools/releases/download/v1.15.0/crictl-v1.15.0-linux-amd64.tar.gz 
+runc_url: https://github.com/opencontainers/runc/releases/download/v1.0.0-rc8/runc.amd64 
+cni_url: https://github.com/containernetworking/plugins/releases/download/v0.8.2/cni-plugins-linux-amd64-v0.8.2.tgz 
+containerd_url: https://github.com/containerd/containerd/releases/download/v1.2.9/containerd-1.2.9.linux-amd64.tar.gz 
+kubectl_url:  https://storage.googleapis.com/kubernetes-release/release/v1.15.3/bin/linux/amd64/kubectl 
+kube_proxy_url: https://storage.googleapis.com/kubernetes-release/release/v1.15.3/bin/linux/amd64/kube-proxy 
+kubelet_url: https://storage.googleapis.com/kubernetes-release/release/v1.15.3/bin/linux/amd64/kubelet

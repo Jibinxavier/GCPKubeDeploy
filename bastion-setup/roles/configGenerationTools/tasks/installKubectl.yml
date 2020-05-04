@@ -1,0 +1,14 @@
+---
+
+- name: Download kubectl
+  get_url: url={{ kubectl_url }} dest=/usr/local/bin/kubectl
+
+
+
+
+- name: Set the permission kubectl
+  file:
+    path:  /usr/local/bin/kubectl
+    owner: root
+    group: root
+    mode: 0755

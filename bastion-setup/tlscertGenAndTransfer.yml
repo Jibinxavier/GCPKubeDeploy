@@ -1,0 +1,123 @@
+---
+## To run on the automation/ansible server
+## This playbook generates and deploys the certs and kubelet config required for the kube componenwdts
+# 
+
+###
+- name: Generating TLS certificates for Kube components
+  become: true
+  hosts: localhost
+  vars_files:
+    - vars/main.yml # assuming that its going to use bastion-setup/roles/configGeneration/vars/main.yml
+  roles:
+    - configGeneration
+
+- name: Install common role kube-controller-private
+  become: true 
+
+  gather_facts: no
+  hosts:  kube-controller-private
+  remote_user: "{{inventory_hostname}}" 
+  pre_tasks:  
+    - name: Install python
+      raw: test -e /usr/bin/python || (apt -y update && apt install -y python-minimal)
+      changed_when: False
+  roles:
+    - common
+
+
+- name: Install common role kube-worker-private
+  become: true 
+
+  gather_facts: no
+  hosts:  kube-worker-private
+  remote_user: "{{inventory_hostname}}" 
+  pre_tasks:  
+    - name: Install python 
+      raw: test -e /usr/bin/python || (apt -y update && apt install -y python-minimal)
+      changed_when: False
+  roles:
+    - common
+ 
+
+
+- name: Distribute TLS Client certificates to workers
+# =========================================
+  hosts: kube-worker-private
+  gather_facts: yes
+
+  remote_user: "{{inventory_hostname}}" #user names are kube-workers and so on
+  become: true
+  vars_files:
+    - vars/main.yml
+  tasks:
+    
+    - name: Copy client certs and keys
+      copy:
+        src: "{{ certDIR }}/{{ item }}"
+        dest: "/{{item}}"
+        owner: root
+        group: root
+        mode: '0644'
+      with_items:
+        - "{{ inventory_hostname }}-key.pem"
+        - "{{ inventory_hostname }}.pem"
+        - ca.pem
+
+
+    - name: Distribute the kubeconfig Files to WORKERS
+      copy:
+        src: "{{ automationHome }}/{{ item }}"
+        dest: "/{{ item }}"
+        owner: root
+        group: root
+        mode: '0644'
+      with_items:
+        - "{{ inventory_hostname }}.kubeconfig"
+        - kube-proxy.kubeconfig 
+
+
+
+- name: Distribute Server Certificates to controllers
+
+  hosts: kube-controller-private
+  gather_facts: yes
+  remote_user: "{{inventory_hostname}}"
+   
+  become: true
+  vars_files:
+    - vars/main.yml
+  tasks: 
+        
+    - name: Copy server private and public keys
+      copy:
+        src: "{{ certDIR }}/{{item}}"
+        dest: "/{{item}}"
+        owner: root
+        group: root
+        mode: '0644'
+
+      with_items:
+        - kubernetes-key.pem
+        - kubernetes.pem 
+        - ca.pem
+        - ca-key.pem
+        - encryption-config.yaml
+        - service-account-key.pem
+        - service-account.pem
+
+    - name: Distribute the Kubeconfig Files to CONTROLLERS
+
+      copy:
+        src: "{{ automationHome }}/{{item}}"
+        dest: "/{{item}}"
+        owner: root
+        group: root
+        mode: '0644'
+
+      with_items:
+        - kube-proxy.kubeconfig
+        - kube-controller-manager.kubeconfig
+        - kube-scheduler.kubeconfig
+        - admin.kubeconfig
+        

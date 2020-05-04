@@ -1,0 +1,7 @@
+---
+# vars file for common
+
+ 
+# defaults file for common
+KUBERNETES_PUBLIC_ADDRESS: "{{ lookup('file',role_path+'/files/ip_pairs.json')| from_json|json_query('\"kube-public-ip\"')  }}"
+certDIR: /automation/CertDir

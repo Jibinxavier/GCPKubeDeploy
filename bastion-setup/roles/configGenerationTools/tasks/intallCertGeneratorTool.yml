@@ -1,0 +1,27 @@
+# tasks file for certificate
+---
+
+- name: Download cfssl
+  get_url: url={{ cfssl_url }} dest=/usr/local/bin/cfssl
+
+- name: Download cfssljson
+  get_url: url={{ cfssljson_url }} dest=/usr/local/bin/cfssljson
+
+ 
+- name: Set the permission cfssl
+  file:
+    path: /usr/local/bin/cfssl
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Set the permission cfssljson
+  file:
+    path: /usr/local/bin/cfssljson
+    owner: root
+    group: root
+    mode: 0755
+ 
+- name: Install jq
+  apt:
+    name: jq

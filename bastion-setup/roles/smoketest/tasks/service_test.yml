@@ -1,0 +1,19 @@
+---
+
+
+
+##### NOT DOING THIS APPROACH WILL BE USING LOAD BALANCER ON WORKERS
+- name: Verify the ability to expose applications using a Service
+  shell: "kubectl expose deployment nginx --port 80 --type NodePort --nodePort 30080"
+
+# - name: Retrieve the node port assigned to the nginx service
+#   shell: "kubectl get svc nginx --output=jsonpath='{range .spec.ports[0]}{.nodePort}'"
+#   register: NODE_PORT
+
+
+- name:  Make an HTTP request using the external IP address and the nginx node port
+  shell: "curl -I http://{{KUBERNETES_PUBLIC_ADDRESS}}:30080"
+  register: command_output
+  failed_when: "'HTTP/1.1 200 OK' not in command_output.stdout_lines "
+
+- debug:  msg="{{command_output.stdout_lines}}"

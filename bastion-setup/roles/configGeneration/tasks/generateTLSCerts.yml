@@ -1,0 +1,17 @@
+---
+
+# Steps 4-6 of https://github.com/kelseyhightower/kubernetes-the-hard-way/blob/master/docs/04-certificate-authority.md
+# Captured here.
+- name: Run cert generator script  
+  shell: "{{ role_path }}/files/cert_generator.sh -i {{ role_path }}/files/ip_pairs.json" # ansible variable  
+
+- name: Generate encryption key (for template)
+  shell: "head -c 16 /dev/urandom | od -An -t x | tr -d ' '"
+  register: ENCRYPTION_KEY
+ 
+- name: Create encryption config file
+  template:
+    src: "{{ role_path }}/templates/encryption-config.yaml.j2"
+    dest: "{{certDIR}}/encryption-config.yaml"
+    mode: '0755'
+

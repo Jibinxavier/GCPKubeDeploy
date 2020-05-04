@@ -1,0 +1,5 @@
+---
+# tasks file for tools
+- import_tasks: installKubectl.yml
+
+- import_tasks: intallCertGeneratorTool.yml

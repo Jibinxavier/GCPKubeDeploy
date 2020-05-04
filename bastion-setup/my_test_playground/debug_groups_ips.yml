@@ -1,0 +1,74 @@
+---
+
+- name: Prepare the ansible server
+  hosts: "127.0.0.1"
+  tasks:
+    # - name: "loop through list"
+      
+      
+    #   vars: 
+    #     main_nodes_ips: "{{ groups['kube-worker-private'] | map('extract', hostvars, ['ansible_host']) | list }}"
+    #     hostnames: "{{ groups['kube-worker-private'] | list }}"
+    #     mapping: "{{hostnames | zip(main_nodes_ips) | list }}"
+    #     test: " {{map('extract', hostvars, ['ansible_host']) | list}}"
+    #   debug:
+    #     msg: "An item: {{ test }}  helleow3oo" 
+    - name: show all the hosts matching the pattern, i.e. all but the group www
+      debug:
+        msg: "{{ item }}   {{item}}@{{hostvars[item]['ansible_host']}}"
+      with_inventory_hostnames:
+        - kube-worker-private
+    - name: "loop through list"
+      
+      debug:
+        msg: "An item: {{item}}  helleow3oo"
+      with_items: "{{ groups['kube-worker-private']}}"
+
+
+            
+    - name: "Extract ips "
+      
+      debug:
+        msg:  "{{ groups['kube-worker-private'] | map('extract', hostvars, ['ansible_host']) |items2dict }}"
+    # - name: "Host vaars"
+      
+    #   debug:
+    #     msg:  "{{ hostvars}}"
+    
+        
+  
+    - name: "DICT all the ansible public ips" # this is trying to match only the ansible public groups
+      vars:
+        - target: 'ansible-public'
+      debug:
+        msg: " {{ item.key }} is {{ item.value.ansible_host }}  "
+      with_dict: "{{ hostvars}}"
+      when: target  in item.value.group_names 
+
+
+    - name: "Retrieve the key value pair" # trying to just get the key value
+      debug:
+        msg: " {{ hostvars['kube-controller-1']['ansible_host'] }} nskfdsjokko  "
+       
+    - name: "DICT all the ansible public ips" # this is trying to match only the ansible public groups
+      vars:
+        - target: 'ansible-public'
+      debug:
+        msg: " {{item item.key }} is {{ item.value.ansible_host }}  "
+      with_dict: "{{ hostvars}}"
+    
+
+
+    # now have to get the  ips of a particular group
+    - name: " match only the ansible private groups" 
+      vars:
+        hostname:  "{{item}}"
+        
+      with_items: "{{ groups['kube-worker-private'] }}"
+      debug:
+        msg: " Hostname {{ hostname }}  {{ hostvars[hostname]['ansible_host'] }}"
+    - name: Tests stff
+      vars: 
+        ips: "{{ lookup('file','ip_pairs.json') | from_json }}"
+      debug:
+        msg: " {{ips['test']}} "

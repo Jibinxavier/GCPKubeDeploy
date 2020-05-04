@@ -1,0 +1,21 @@
+---
+# tasks file for common
+
+
+
+
+- name: Update and upgrade apt packages
+  become: true
+  apt:
+    upgrade: yes
+    update_cache: yes
+    cache_valid_time: 86400 #One day
+
+
+- name: Install ansible on the automation(ansible-server)
+    
+  become: true
+  apt:
+    name: ansible
+  
+

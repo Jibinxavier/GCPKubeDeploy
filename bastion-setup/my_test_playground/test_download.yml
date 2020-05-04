@@ -1,0 +1,42 @@
+- name: Prepare the ansible server
+  hosts: "127.0.0.1"
+  tasks:
+    - name: Ensure group "etcd" exists
+      group:
+        name: etcd
+        state: present
+    - name: Add the user 'etcd' and a primary group of 'etcd'
+      user:
+        name: etcd
+        # password_lock: yes #prevents login but have to upgrade to 2.8 ansible to use it
+        comment: Etcd local user
+        group: etcd
+        
+    - name: Download ETCD
+      get_url: url="https://github.com/etcd-io/etcd/releases/download/v3.4.0/etcd-v3.4.0-linux-amd64.tar.gz" dest=/tmp
+
+    - name: Extract etcd   
+      unarchive:
+        src: "/tmp/etcd-v3.4.0-linux-amd64.tar.gz"
+        dest: /tmp
+
+    - name: Copy etcd into /usr/local/bin/
+      copy:
+        src: "{{ item }}"
+        dest: /usr/local/bin/
+        owner: root
+        group: root
+        mode: '0755'
+      with_fileglob:
+        - "/tmp/etcd-v3.4.0-linux-amd64/etcd*"
+        
+    - name: Configure the etcd Server - /etc/etcd
+      file:
+        path:  /etc/etcd 
+        state: directory
+
+
+    - name: Configure the etcd Server - /var/lib/etcd
+      file:
+        path:  /var/lib/etcd
+        state: directory

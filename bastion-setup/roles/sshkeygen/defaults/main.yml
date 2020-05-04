@@ -1,0 +1,4 @@
+---
+# defaults file for sshkeygen
+
+local_ssh_dir: ../../../ssh_keys

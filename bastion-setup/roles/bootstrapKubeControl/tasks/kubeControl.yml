@@ -1,0 +1,152 @@
+---
+# tasks file for bootstrapKubeControl
+- name: Ensure group "kube" exists
+  group:
+    name: kube
+    state: present
+- name: Add the user 'kube' and a primary group of 'kube'
+  user:
+    name: kube
+    comment: kube local user
+    group: kube
+- name: Create kubernetes configuration directory
+  file: 
+    path:  /etc/kubernetes/config
+    state: directory
+
+
+- name: Downloading kube-apiserver, kube-controller-manager, kube-scheduler and kubectl
+  get_url: 
+    url: "{{ item }}"
+    dest: /tmp
+  with_items:
+    - "https://storage.googleapis.com/kubernetes-release/release/{{default_version}}/bin/linux/amd64/kube-apiserver"
+    - "https://storage.googleapis.com/kubernetes-release/release/{{default_version}}/bin/linux/amd64/kube-controller-manager"
+    - "https://storage.googleapis.com/kubernetes-release/release/{{default_version}}/bin/linux/amd64/kube-scheduler"
+    - "https://storage.googleapis.com/kubernetes-release/release/{{default_version}}/bin/linux/amd64/kubectl"
+ 
+
+- name: Copy kube-apiserver, kube-controller-manager, kube-scheduler and kubectl into /usr/local/bin/
+  copy:
+    src: "{{ item }}"
+    dest: /usr/local/bin/
+    owner: kube
+    group: kube
+    mode: '0755'
+    remote_src: yes
+  with_items:
+    - "/tmp/kube-apiserver"
+    - "/tmp/kube-controller-manager"
+    - "/tmp/kube-scheduler"
+    - "/tmp/kubectl"
+  
+- name: Create Kubernetes API Server directory /var/lib/kubernetes/
+  file: 
+    path:  /var/lib/kubernetes/
+    state: directory
+
+- name: Move Certs to /var/lib/kubernetes/
+  copy:
+    src: "/{{ item }}"
+    dest: /var/lib/kubernetes/
+    owner: kube
+    group: kube
+    mode: '0644'
+    remote_src: yes
+
+  with_items:
+    - kubernetes-key.pem
+    - kubernetes.pem 
+    - ca.pem
+    - ca-key.pem
+    - encryption-config.yaml
+    - service-account-key.pem
+    - service-account.pem
+
+
+#Configure the Kubernetes API Server
+- name: Retrieve the internal IP address for the current compute instance
+  uri:
+    url: http://metadata.google.internal/computeMetadata/v1/instance/network-interfaces/0/ip
+    method: GET
+    return_content: yes
+    headers:
+      Metadata-Flavor: Google
+  register: internal_ip
+
+- name: Generate the kube-apiserver systemd service file
+  template:
+    src: "{{ role_path }}/templates/kube-apiserver.service.j2"
+    dest:  /etc/systemd/system/kube-apiserver.service
+    mode: '0755'
+
+- name: Start kube-apiserver
+  service: 
+    name: kube-apiserver.service
+    state: started 
+    enabled: yes
+
+
+- name: Generate the kube-apiserver systemd service file
+  template:
+    src: "{{ role_path }}/templates/kube-apiserver.service.j2"
+    dest:  /etc/systemd/system/kube-apiserver.service
+    mode: '0755'
+
+#Configure the Kubernetes Controller Manager
+    
+- name: Move kube-controller-manager.kubeconfig /var/lib/kubernetes/
+  copy:
+    src: "/kube-controller-manager.kubeconfig"
+    dest: /var/lib/kubernetes/
+    remote_src: yes
+
+    owner: kube
+    group: kube
+    mode: '0644'
+
+- name: Generate the kube-controller-manager systemd service file
+  template:
+    src: "{{ role_path }}/templates/kube-controller-manager.service.j2"
+    dest:  /etc/systemd/system/kube-controller-manager.service
+    mode: '0755'
+
+
+# Configure the Kubernetes Scheduler
+- name: Move  kube-scheduler.kubeconfig /var/lib/kubernetes/
+  copy:
+    src: "/kube-scheduler.kubeconfig"
+    dest: /var/lib/kubernetes/
+    owner: kube
+    group: kube
+    mode: '0644' # might be too restrictive
+    remote_src: yes
+- name: Create the kube-scheduler.yaml configuration file
+  template:
+    src: "{{ role_path }}/templates/kube-scheduler.yaml.j2"
+    dest:  /etc/kubernetes/config/kube-scheduler.yaml
+    mode: '0755'
+ 
+- name: Generate the kube-scheduler systemd service file
+  template:
+    src: "{{ role_path }}/templates/kube-scheduler.service.j2"
+    dest:  /etc/systemd/system/kube-scheduler.service
+    mode: '0755'
+
+- name: systemd reload
+  systemd:
+    daemon_reload: yes
+
+
+# Start the Controller Services
+
+- name: Start the Controller Services
+  service: 
+    name: "{{ item }}"
+    state: started 
+    enabled: yes
+  with_items: 
+    - kube-apiserver
+    - kube-controller-manager
+    - kube-scheduler
+

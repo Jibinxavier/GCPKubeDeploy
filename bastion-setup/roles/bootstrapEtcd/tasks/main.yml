@@ -1,0 +1,103 @@
+---
+# tasks file for bootstrapEtcd
+ 
+
+- name: Ensure group "etcd" exists
+  group:
+    name: etcd
+    state: present
+- name: Add the user 'etcd' and a primary group of 'etcd'
+  user:
+    name: etcd
+    comment: Etcd local user
+    group: etcd
+    # password_lock: yes #prevents login using etcd but have to upgrade to 2.8 ansible to use it
+
+  
+- name: Download and Extract etcd   
+  unarchive:
+    src: "{{ etcd_binary_url }}"
+    dest: /tmp/
+    remote_src: yes
+
+- name: Copy etcd into /usr/local/bin/
+  copy:
+    src: "/tmp/{{ etcd_binary_dir }}/{{item}}"
+    dest: "/usr/local/bin/{{item}}"
+    owner: etcd
+    group: etcd
+    mode: '0755'
+    remote_src: yes
+    
+  with_items:
+    - etcdctl
+    - etcd
+
+- name: Configure the etcd Server - /etc/etcd
+  file:
+    path:  /etc/etcd 
+    state: directory
+
+
+- name: Configure the etcd Server - /var/lib/etcd
+  file:
+    path:  /var/lib/etcd
+    state: directory
+    
+
+- name: Move certs into  /etc/etcd 
+  copy:
+    src: "/{{item}}"
+    dest: "/etc/etcd/"
+    owner: root
+    group: root
+    mode: '0644'
+    remote_src: yes
+    
+  with_items:
+    - ca.pem
+    - kubernetes.pem
+    - kubernetes-key.pem
+
+- name: Retrieve the internal IP address for the current compute instance
+  uri:
+    url: http://metadata.google.internal/computeMetadata/v1/instance/network-interfaces/0/ip
+    method: GET
+    return_content: yes
+    headers:
+      Metadata-Flavor: Google
+  register: internal_ip
+
+
+- name: Clean etcd downloads
+  file:
+    state: absent
+    path: "/tmp/{{ etcd_binary_dir }}"
+  
+
+  
+- name: Generate the etcd systemd service file
+  template:
+    src:  ../templates/etcd.service.j2
+    dest:  /etc/systemd/system/etcd.service
+    mode: '0755' 
+
+- name: Start etcd
+  service: 
+    name: etcd.service 
+    state: started 
+    enabled: yes
+
+   
+- name: Verify if cluster bootstraped the servers
+  shell: |
+      ETCDCTL_API=3; etcdctl member list \
+      --endpoints=https://127.0.0.1:2379 \
+      --cacert=/etc/etcd/ca.pem \
+      --cert=/etc/etcd/kubernetes.pem \
+      --key=/etc/etcd/kubernetes-key.pem |grep -c 'started'
+  register: result
+  failed_when:
+    - result.rc !=0
+    - result.stdout < 3 
+  

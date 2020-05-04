@@ -1,0 +1,22 @@
+---
+# tasks file for setupKubeRBAC
+ 
+- name: Transfer the clusterrole.yml clusterrolebinding.yml
+  copy:
+    src:  "{{role_path}}/files/{{ item }}"
+    dest: "/{{item}}"
+    owner: root
+    group: root
+    mode: '0644'
+  with_items:
+    - "clusterrole.yml"
+    - "clusterrolebinding.yml"
+
+- name:  Create the system:kube-apiserver-to-kubelet
+  shell: "kubectl apply --kubeconfig /admin.kubeconfig -f /clusterrole.yml"
+ 
+
+- name:  Bind the system:kube-apiserver-to-kubelet ClusterRole to the kubernetes user
+  shell: "kubectl apply --kubeconfig /admin.kubeconfig -f /clusterrolebinding.yml"
+    
+ 

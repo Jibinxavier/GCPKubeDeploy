@@ -1,0 +1,5 @@
+---
+
+IP_FILE: "{{role_path}}/../configGeneration/files/ip_pairs.json"
+
+KUBERNETES_PUBLIC_ADDRESS: "{{ lookup('file',IP_FILE)| from_json|json_query('\"kube-public-ip\"')  }}"

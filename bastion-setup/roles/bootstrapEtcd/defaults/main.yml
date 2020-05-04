@@ -1,0 +1,5 @@
+---
+
+# adjust dir accordingly for a different version of etcd
+etcd_binary_url: "https://github.com/etcd-io/etcd/releases/download/v3.4.0/etcd-v3.4.0-linux-amd64.tar.gz"
+etcd_binary_dir: "etcd-v3.4.0-linux-amd64"

@@ -1,0 +1,8 @@
+---
+# tasks file for smoketest
+
+- import_role: data_enc_test.yml
+- import_role: deployments_test.yml
+- import_role: logs_test.yml
+- import_role: exec_test.yml
+- import_role: service_test.yml

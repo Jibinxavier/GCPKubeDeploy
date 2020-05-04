@@ -1,0 +1,14 @@
+- name: Sheell test
+  hosts: "127.0.0.1"
+  vars:
+    internal_ip:
+      content: "hellow" 
+    content: "htes"
+
+  tasks:
+    - name: Verify if cluster bootstraped the servers
+      shell: echo 
+      register: result
+
+      failed_when: 
+        - result.stdout <2

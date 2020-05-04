@@ -1,0 +1,12 @@
+- name: Prepare the ansible server
+  hosts: "127.0.0.1"
+  vars:
+    internal_ip:
+      content: "hellow" 
+    content: "htes"
+
+  tasks:
+    - import_role:
+        name: bootstrapEtcd
+
+

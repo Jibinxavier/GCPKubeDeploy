@@ -1,0 +1,18 @@
+- name: Create a generic secret
+  shell: |
+    kubectl create secret generic kubernetes-the-hard-way \
+    --from-literal="mykey=mydata"
+
+#The etcd key should be prefixed with k8s:enc:aescbc:v1:key1, which indicates the aescbc provider was used to encrypt the data with the key1 encryption key.
+
+- name: Print a hexdump of the kubernetes-the-hard-way secret stored in etcd
+  shell: |
+    ETCDCTL_API=3 etcdctl get \
+    --endpoints=https://127.0.0.1:2379 \
+    --cacert=/etc/etcd/ca.pem \
+    --cert=/etc/etcd/kubernetes.pem \
+    --key=/etc/etcd/kubernetes-key.pem\
+    /registry/secrets/default/kubernetes-the-hard-way | hexdump -
+  register: command_result
+  failed_when: "'k8s:enc:aescbc:v1:key1' not in command_result.stdout "
+  

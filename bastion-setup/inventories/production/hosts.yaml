@@ -1,0 +1,50 @@
+all:
+
+  children:
+    automation-private:
+      hosts:
+        bastion:
+          ansible_host: 10.241.0.10
+          ansible_port: 22
+          ansible_ssh_extra_args: '-o StrictHostKeyChecking=no'
+          ansible_ssh_private_key_file: ./ssh_keys/bastion
+    automation-public:
+      hosts:
+        bastion_pub:
+          ansible_host: 
+          ansible_port: 22
+          ansible_ssh_private_key_file: ./ssh_keys/bastion
+    kube-controller-private:
+      hosts:
+        kube-controller-0:
+          ansible_host: 10.240.0.10
+          ansible_port: 22
+          ansible_ssh_extra_args: '-o StrictHostKeyChecking=no'
+          ansible_ssh_private_key_file: ./ssh_keys/kube-controller-0
+        kube-controller-1:
+          ansible_host: 10.240.0.11
+          ansible_port: 22
+          ansible_ssh_extra_args: '-o StrictHostKeyChecking=no'
+          ansible_ssh_private_key_file: ./ssh_keys/kube-controller-1
+        kube-controller-2:
+          ansible_host: 10.240.0.12
+          ansible_port: 22
+          ansible_ssh_extra_args: '-o StrictHostKeyChecking=no'
+          ansible_ssh_private_key_file: ./ssh_keys/kube-controller-2
+    kube-worker-private:
+      hosts:
+        kube-worker-0:
+          ansible_host: 10.240.0.20
+          ansible_port: 22
+          ansible_ssh_extra_args: '-o StrictHostKeyChecking=no'
+          ansible_ssh_private_key_file: ./ssh_keys/kube-worker-0
+        kube-worker-1:
+          ansible_host: 10.240.0.21
+          ansible_port: 22
+          ansible_ssh_extra_args: '-o StrictHostKeyChecking=no'
+          ansible_ssh_private_key_file: ./ssh_keys/kube-worker-1
+        kube-worker-2:
+          ansible_host: 10.240.0.22
+          ansible_port: 22
+          ansible_ssh_extra_args: '-o StrictHostKeyChecking=no'
+          ansible_ssh_private_key_file: ./ssh_keys/kube-worker-2

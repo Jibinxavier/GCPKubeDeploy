@@ -1,0 +1,15 @@
+---
+# tasks file for setupKubeRBAC
+
+# Start the Controller Services
+
+- name: Start the Controller Services
+  service: 
+    name: "{{ item }}"
+    state: restarted 
+    enabled: yes
+  with_items: 
+    - kube-apiserver
+    - kube-controller-manager
+    - kube-scheduler
+

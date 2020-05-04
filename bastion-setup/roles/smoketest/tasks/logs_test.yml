@@ -1,0 +1,9 @@
+---
+
+- name: Verify the ability to retrieve container logs
+  shell: "kubectl logs  {{POD_NAME.stdout}}"
+  register: command_output
+  failed_when: "command_output.stdout | length <= 0" # returns empty if not found
+
+- debug: msg="{{command_output.stdout_lines}}"
+

@@ -1,0 +1,11 @@
+- name: Prepare the ansible server
+  hosts: "127.0.0.1"
+  tasks:
+    - name: Retrieve the internal IP address for the current compute instance
+      uri:
+        url: http://metadata.google.internal/computeMetadata/v1/instance/network-interfaces/0/ip
+        method: GET
+        return_content: yes
+        headers:
+          Metadata-Flavor: Google
+      register: ip

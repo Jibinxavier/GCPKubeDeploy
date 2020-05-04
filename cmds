@@ -1,0 +1,3 @@
+
+
+python populate_hosts.py --tf_state infrastructure/terraform.tfstate --ansible_inv  inventories/production/hosts.yaml --ssh_dir ssh_keys/ --json_v roles/configGeneration/files/

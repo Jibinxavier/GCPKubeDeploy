@@ -1,0 +1,13 @@
+---
+# responsible for generating cert and installation
+# import all the playbooks here
+- name: Deploying ansible server
+  import_playbook: bootstrap-auto-server.yml 
+
+  # import_playbook: ansible-server.yml
+
+#TODO: need to figure out a way to invoke th following playbooks from local
+# on automation server
+#import_playbook: install-kubenv.yml
+
+#import_playbook: certransfer.yml

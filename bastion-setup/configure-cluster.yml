@@ -1,0 +1,64 @@
+---
+# This playbook is to be run on the automation server.
+ 
+#### TODO
+
+#######################
+
+# - name: Restart all the kube controller services 
+#   hosts: kube-controller-private 
+#   gather_facts: no
+#   become: true 
+#   when: "'restartControllers'  in ansible_run_tags"
+#   remote_user: "{{inventory_hostname}}"
+#   roles:
+#     - restartControllerServices
+#   tags:
+#     - restartControllers
+
+- name: Bootstrap Controllers
+  hosts: kube-controller-private 
+  gather_facts: no
+  become: true 
+  remote_user: "{{inventory_hostname}}"
+  roles:
+    - bootstrapEtcd
+    - bootstrapKubeControl 
+  tags:
+    - bootstrap-controller
+- name: RBAC for Kubelet Authorization
+  remote_user: "{{inventory_hostname}}"
+  become: true 
+  hosts: kube-controller-0
+  roles:
+    - setupKubeRBAC
+  tags:
+    - RBAC
+
+
+- name: Bootstrap workers
+  hosts: kube-worker-private 
+  gather_facts: no
+  become: true 
+  remote_user: "{{inventory_hostname}}"
+  
+  roles: 
+    - bootstrapKubeWorkers
+  tags:
+    - bootstrap-workers
+
+
+
+
+
+- name: Deploying the DNS Cluster Add-on
+  remote_user: "{{inventory_hostname}}"
+  hosts: kube-controller-0
+  roles:
+    - dnsAddon
+  tags:
+    - dns
+
+
+
+
