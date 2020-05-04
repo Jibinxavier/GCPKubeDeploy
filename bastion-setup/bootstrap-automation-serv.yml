@@ -1,7 +1,25 @@
 ---
+# Bootstrap the bastion server with playbooks 
+- name: Prepare role and playbook files for transfer
+  hosts: localhost
+  gather_facts: no
+  become: false 
+  tasks:
+    - name: Archive roles and playbooks
+      archive:
+        path:
+          - roles/
+          - inventories
+          - configure-cluster.yml
+          - tlscertGenAndTransfer.yml
+          - reboot_all.yml
+          - vars/
+          - ssh_keys/
+        dest: ./roles_and_playbooks.gz
+      format: gz
 
-##### To run on the local machine i.e workstation
-- name: Prepare the Automation server
+  
+- name: Prepare the Bastion server
   hosts: bastion_pub
   gather_facts: no
   become: true 
@@ -15,77 +33,20 @@
   roles:
     - common
     - configGenerationTools
-  
-
-- name: Transfer bastion server playbook components
-  hosts: bastion_pub
-  remote_user: "bastion"
-  become: true
   tasks:
-    - name: Ensure group "bastion" exists
-      group:
-        name: bastion
-        state: present
-    - name: Add the user 'bastion' and a primary group of 'bastion'
-      user:
-        name: bastion
-        comment: bastion local user
-        group: bastion
-    - name: Create CertDir
+    - name: Extract roles_and_playbooks.tgz into /automation
+      unarchive:
+        src: roles_and_playbooks.gz
+        dest: /automation
+        owner: bastion
+
+ 
+- name: Clean up roles_and_playbooks.gz
+  hosts: localhost
+  gather_facts: no
+  become: false 
+  tasks:
+    - name: Remove file roles_and_playbooks.gz
       file:
-        path: /automation/CertDir
-        state: directory  
-        owner: bastion
-        group: bastion
-    - name: Copy ansible Inventory
-      copy:
-        src: ./inventories
-        dest: /automation/
-        owner: bastion
-        group: bastion
-        mode: '0755' 
-
-    - name: Copy all ansible Roles
-      copy:
-        src: ./roles
-        dest: /automation/
-        owner: bastion
-        group: bastion
-        mode: '0755' 
-    
-    - name: Copy install kube Cluster playbook
-      copy:
-        src: configure-cluster.yml
-        dest: /automation/configure-cluster.yml
-        owner: bastion
-        group: bastion
-        mode: '0755' 
-   
-    - name: Copy tlscertGenAndTransfer playbook
-      copy:
-        src: tlscertGenAndTransfer.yml
-        dest: /automation/tlscertGenAndTransfer.yml
-        owner: bastion
-        group: bastion
-        mode: '0755' 
-    - name: Copy reboot_all playbook
-      copy:
-        src: reboot_all.yml
-        dest: /automation/reboot_all.yml
-        owner: bastion
-        group: bastion
-        mode: '0755' 
-    - name: Copy over playbook vars to automation server
-      copy:
-        src: ./vars
-        dest: /automation/
-        owner: bastion
-        group: bastion
-        mode: '0755'
-
-    - name: Copy over ssh keys to automation server
-      vars_files:
-        - vars/main.yml
-      import_role:
-        name: sshkeygen
-
+        path: ./roles_and_playbooks.gz
+        state: absent

@@ -1,4 +1,7 @@
 *.json
 ssh/*
-.terraform/*
+.terraform
 temp
+bastion-setup/inventories/production/hosts.yaml
+infrastructure/terraform.tfstate
+inventories/production/hosts.yaml
