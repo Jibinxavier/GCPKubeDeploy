@@ -1,3 +1,4 @@
 *.json
 ssh/*
 .terraform/*
+temp
