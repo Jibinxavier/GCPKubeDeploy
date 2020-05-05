@@ -39,6 +39,7 @@
         src: roles_and_playbooks.gz
         dest: /automation
         owner: bastion
+        group: bastion
 
  
 - name: Clean up roles_and_playbooks.gz

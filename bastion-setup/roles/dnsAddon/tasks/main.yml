@@ -19,7 +19,7 @@
 
 
 - name: Create a busybox  if doesnt exist
-  shell: "kubectl run --generator=run-pod/v1 busybox --image=busybox:1.28 --command -- sleep"
+  shell: "kubectl run --generator=run-pod/v1 busybox --image=busybox:1.28 --command -- sleep 3600"
   when: "'busybox' not in BUSYBOX_OUT.stdout"
 
 

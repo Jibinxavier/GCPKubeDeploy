@@ -1,14 +1,14 @@
 all:
 
   children:
-    automation-private:
+    bastion-private:
       hosts:
         bastion:
           ansible_host: 10.241.0.10
           ansible_port: 22
           ansible_ssh_extra_args: '-o StrictHostKeyChecking=no'
           ansible_ssh_private_key_file: ./ssh_keys/bastion
-    automation-public:
+    bastion-public:
       hosts:
         bastion_pub:
           ansible_host: 

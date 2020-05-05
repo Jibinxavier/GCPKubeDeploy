@@ -3,3 +3,12 @@
 - import_tasks: installKubectl.yml
 
 - import_tasks: intallCertGeneratorTool.yml
+
+- name: Create /automation dir
+  file:
+    path: /automation
+    state: directory
+    owner: bastion
+    group: bastion
+
+
