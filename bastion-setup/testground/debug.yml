@@ -1,0 +1,79 @@
+---
+
+- name: Prepare the ansible server
+  hosts: "127.0.0.1"
+  tasks:
+    - name: Test json  load
+
+      vars:
+        ip:  "{{ lookup('file','bastion-setup/roles/configGeneration/files/ip_pairs.json') | from_json|json_query('\"kube-public-ip\"'') }}"
+      debug:
+        msg: "{{ip}}"
+    - name: "loop through list"
+      
+      debug:
+        msg: "An item: {{item}}"
+      with_items: "{{ groups['kube-worker-private']}}"
+    - name: "DICT"
+      
+      debug:
+        msg: " {{ item.key }} is {{ item.value }} "
+      with_dict: "{{ hostvars}}"
+      when:
+        - not item | skipped
+      
+    - name: "loop through list"
+      
+      debug:
+        msg: "An item2: {{item}}"
+      with_inventory_hostnames: 
+        - kube-worker-private
+
+
+
+    - name: "through list"
+      
+      debug:
+        msg: "An item2: {{item}} "
+      with_items:
+        - "{{ hostvars['ansible-server_pub'].ansible_host }}" 
+        - "{{ hostvars['kube-controller-private'].ansible_host  }}"
+    
+
+
+    - name: Test templates
+         
+      vars:
+        hostname:  "{{item}}"
+       
+      with_items: "{{ groups}}"
+      template:
+        src: worker.json.j2
+        dest: bastion-setup/test_worker.json
+
+    # - name: Print some debug information 
+    #   vars: 
+    #     msg: |
+    #         Module Variables ("vars"):
+    #         --------------------------------
+    #         {{ vars | to_nice_json }} 
+    
+    #         Environment Variables ("environment"):
+    #         --------------------------------
+    #         {{ environment | to_nice_json }} 
+    
+    #         GROUP NAMES Variables ("group_names"):
+    #         --------------------------------
+    #         {{ group_names | to_nice_json }}
+    
+    #         GROUPS Variables ("groups"):
+    #         --------------------------------
+    #         {{ groups | to_nice_json }}
+    
+    #         HOST Variables ("hostvars"):
+    #         --------------------------------
+    #         {{ hostvars | to_nice_json }} 
+    
+    #   debug: 
+    #     msg: "{{ msg.split('\n') }}"       
+    #   tags: debug_info

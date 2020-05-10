@@ -1,0 +1,28 @@
+
+
+- name: Prepare the ansible server
+  hosts: "127.0.0.1"
+  tasks:
+
+  - name: "loop through list"
+      
+    debug:
+      msg: "An item: {{groups}}"
+    # with_items: "{{ groups['kube-worker-private']}}"
+
+  - name: "loop through list"
+      
+    debug:
+      msg: "An item: {{hostvars}}"
+    # with_items: "{{ groups['kube-worker-private']}}"
+
+  - name: Update the /etc/hosts file with node name
+    become: true
+    lineinfile:
+      path: "hosts" 
+      line: "{{hostvars[item]['ansible_host']}} {{item}}"
+      state: present
+      backup: yes
+    with_items: 
+      - "{{ groups['kube-worker-private']}}"
+      -  "{{ groups['kube-controller-private'] }}"

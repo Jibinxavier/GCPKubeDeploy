@@ -1,0 +1,6 @@
+10.240.0.20 kube-worker-0
+10.240.0.21 kube-worker-1
+10.240.0.22 kube-worker-2
+10.240.0.12 kube-controller-2
+10.240.0.10 kube-controller-0
+10.240.0.11 kube-controller-1

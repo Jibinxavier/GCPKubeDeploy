@@ -18,4 +18,14 @@
   apt:
     name: ansible
   
-
+#ref https://www.middlewareinventory.com/blog/ansible-update-etc-hosts-file-across-all-hosts/
+- name: Add controller and worker names to the /etc/hosts file 
+  become: true
+  lineinfile:
+    path: "/etc/hosts" 
+    line: "{{hostvars[item]['ansible_host']}} {{item}}"
+    state: present
+    backup: yes
+  with_items: 
+    - "{{ groups['kube-worker-private']}}"
+    - "{{ groups['kube-controller-private'] }}"
